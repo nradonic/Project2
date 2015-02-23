@@ -331,23 +331,24 @@ public class PhysicsTestHelper {
      */
     public static void createWall(Node rootNode, AssetManager assetManager,
             PhysicsSpace space) {
-        Vector3f wallSize = new Vector3f(20, 100, 0.1f);
-        Vector3f wallLocation = new Vector3f(0, 0, -20);
+        final float WallHeight = 100f;
+        Vector3f wallSize = new Vector3f(20, WallHeight, 0.1f);
+        Vector3f wallLocation = new Vector3f(0, WallHeight, -20);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
 
         // parameters for a wall 
-        wallSize = new Vector3f(20, 100, 0.1f);
-        wallLocation = new Vector3f(0, 0, 20);
+        wallSize = new Vector3f(20, WallHeight, 0.1f);
+        wallLocation = new Vector3f(0, WallHeight, 20);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
 
         // parameters for a wall 
-        wallSize = new Vector3f(0.1f, 100, 20);
-        wallLocation = new Vector3f(-20, 0, 0);
+        wallSize = new Vector3f(0.1f, WallHeight, 20);
+        wallLocation = new Vector3f(-20, WallHeight, 0);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
 
         // parameters for a wall 
-        wallSize = new Vector3f(0.1f, 100, 20);
-        wallLocation = new Vector3f(20, 0, 0);
+        wallSize = new Vector3f(0.1f, WallHeight, 20);
+        wallLocation = new Vector3f(20, WallHeight, 0);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
     }
 }

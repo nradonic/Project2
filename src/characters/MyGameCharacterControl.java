@@ -14,6 +14,7 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 import com.jme3.scene.control.CameraControl;
+import org.omg.CORBA.SetOverrideTypeHelper;
 
 /**
  *
@@ -30,18 +31,18 @@ public class MyGameCharacterControl extends BetterCharacterControl
     private float cooldown = 0f;
     // Nick Radonic - new Nodes
     private Node owner;
-    public Boolean current;
-    private Boolean definitionTF;
+//    public Boolean current;
+//    private Boolean definitionTF;
 
     public MyGameCharacterControl(float radius, float height, float mass) {
-        super(radius, height, mass);
-        head.setLocalTranslation(0, 2f, 0);
+        super(radius, 2*height, mass);
+        head.setLocalTranslation(0, height, 0);
+        
     }
 
-    public void setNodes(Node owner, Boolean current, Boolean definitionTF) {
+    public void setNodes(Node owner) {
         this.owner = owner;
-        this.current = current;
-        this.definitionTF = definitionTF;
+        
     }
 
     public void onAction(String action, boolean isPressed, float tpf) {

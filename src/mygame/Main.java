@@ -45,7 +45,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         // custom camera positioning:
-        cam.setLocation(new Vector3f(0,25,50));
+        cam.setLocation(new Vector3f(0,25,100));
         Vector3f upV = new Vector3f(0, 0.95f, -0.3f);
         Vector3f leftV =  new Vector3f(-1f, 0, 0);
         Vector3f dirV = new Vector3f(0, -0.3f, -.95f);
@@ -67,13 +67,18 @@ public class Main extends SimpleApplication {
         PhysicsTestHelper.createWall(rootNode, assetManager, bulletAppState.getPhysicsSpace());
 
         //Add the Player to the world and use the customer character and input control classes
-        Node playerNode = (Node)assetManager.loadModel("Models/Oto/Oto.mesh.xml");
+        float charHeight = 5f;
+        
+        Node dummyTranslation = (Node)assetManager.loadModel("Models/Oto/Oto.mesh.xml");
+        Node playerNode = new Node();
+        dummyTranslation.setLocalTranslation(new Vector3f(0, charHeight, 0));
+        playerNode.attachChild(dummyTranslation);
         playerNode1 = playerNode;
-        MyGameCharacterControl charControl = new MyGameCharacterControl(3f,8f,80f);
+        MyGameCharacterControl charControl = new MyGameCharacterControl(3f,charHeight,80f);
         
         charControl.setCamera(cam);
-        charControl.setNodes(playerNode1, currentControl, true); // modified control param
-                
+        charControl.setNodes(playerNode1); 
+        
         playerNode.addControl(charControl);
         charControl.setGravity(normalGravity);
         bulletAppState.getPhysicsSpace().add(charControl);
@@ -131,7 +136,7 @@ public class Main extends SimpleApplication {
         guiNode.attachChild(hudText);
         
         // Nick Radonic debug collisions
-        bulletAppState.setDebugEnabled(false);
+        bulletAppState.setDebugEnabled(true);
         
     }
 
