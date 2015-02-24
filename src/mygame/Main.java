@@ -20,6 +20,9 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import java.awt.Color;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -171,7 +174,7 @@ public class Main extends SimpleApplication {
             Vector3f xPLOC = x.getControl(RigidBodyControl.class).getPhysicsLocation();
             Vector3f xPVEL = x.getControl(RigidBodyControl.class).getLinearVelocity();
             Vector3f xROT = x.getControl(RigidBodyControl.class).getAngularVelocity();
-            BallState bs = new BallState(i, sampleNumber, xPLOC, xPVEL, xROT);
+            BallState bs = new BallState(i, sampleNumber, tpf, xPLOC, xPVEL, xROT);
             ballRecords.add(bs);
             if (printStr) {
                 str1Line += bs.toString();
@@ -217,5 +220,35 @@ public class Main extends SimpleApplication {
         Vector3f camLeft = cam.getLeft();
         str += "Cam Left x: " + camLeft.x + " y: " + camLeft.y + " z:" + camLeft.z + "\n";
         return str;
+    }
+
+    @Override
+    public void stop() {
+        String userHome = System.getProperty("user.home");
+        try {
+            //System.out.println("try");
+            File file = new File( "assets/savedgames/gameballs.txt");
+            //System.out.println("new file "+file.getAbsolutePath());
+            file.createNewFile();
+            //System.out.println("create file");
+            FileWriter fw = new FileWriter(file);
+            //System.out.println("file writer");
+
+            for (int i = Math.max(0, ballRecords.size() - 500); i < ballRecords.size(); i++) {
+                BallState bs = ballRecords.get(i);
+                String bss = bs.toString();
+                System.out.println(bss);
+                fw.write(bss);
+            }
+            fw.flush();
+            //System.out.println("flush fw");
+            fw.close();
+            //System.out.println("fw close");
+            System.out.println("Game ball position data written to gameballs.txt");
+        } catch (IOException ioex) {
+            System.out.println("Can't save data file gameballs.txt\n"+ioex );
+        }
+
+        super.stop();
     }
 }

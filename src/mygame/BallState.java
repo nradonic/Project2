@@ -17,13 +17,15 @@ public class BallState {
     private Vector3f ballRotation;
     private int sampleNumber;
     private int ballNumber;
-
-    BallState(int ballNumber, int sampleNumber, Vector3f ballLocation, Vector3f ballVelocity, Vector3f ballRotation) {
+    private float tpf;
+    
+    BallState(int ballNumber, int sampleNumber, float tpf, Vector3f ballLocation, Vector3f ballVelocity, Vector3f ballRotation) {
         this.ballLocation = ballLocation;
         this.ballVelocity = ballVelocity;
         this.ballRotation = ballRotation;
         this.sampleNumber = sampleNumber;
         this.ballNumber = ballNumber;
+        this.tpf = tpf;
     }
 
     /**
@@ -98,7 +100,21 @@ public class BallState {
     
     public String toString(){
         String result = "";
-        result += "# "+ballNumber+" Sample: "+sampleNumber+" POSN: "+ballLocation+"\nVEL: "+ballVelocity+" ROT: "+ballRotation+"\n";
+        result += "# "+ballNumber+" Sample: "+sampleNumber+" Time: "+tpf+ " POSN: "+ballLocation+"\nVEL: "+ballVelocity+" ROT: "+ballRotation+"\n";
         return result;
+    }
+
+    /**
+     * @return the tpf
+     */
+    public float getTpf() {
+        return tpf;
+    }
+
+    /**
+     * @param tpf the tpf to set
+     */
+    public void setTpf(float tpf) {
+        this.tpf = tpf;
     }
 }
