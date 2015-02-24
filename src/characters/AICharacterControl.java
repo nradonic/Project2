@@ -22,7 +22,7 @@ public class AICharacterControl extends BetterCharacterControl
     boolean forward = false, backward = false;
     protected Node head = new Node("Head");
     private float yaw = 0;
-    protected float moveSpeed = 75f;
+    protected float moveSpeed = 30f;
     
     public AICharacterControl(float radius, float height, float mass) {
         super(radius, height, mass);

@@ -14,8 +14,9 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
@@ -52,7 +53,7 @@ public class Main extends SimpleApplication {
     private Vector3f target;
     private NavMeshNavigationControl nmnc;
     private Geometry targetGeom;
-    
+
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -131,8 +132,8 @@ public class Main extends SimpleApplication {
         aiCharacter.setLocalTranslation(-50f, 10f, 50f);
         aiCharacter.addControl(physicsCharacter);
         aic = aiCharacter;
-        
-        
+
+
         bulletAppState.getPhysicsSpace().add(physicsCharacter);
         aiCharacter.setLocalScale(5f);
         scene.attachChild(aiCharacter);
@@ -141,8 +142,9 @@ public class Main extends SimpleApplication {
         aiCharacter.addControl(navMesh);
 
         // display search target location
-        target = new Vector3f(60, 10, -55);
-        navMesh.moveTo(target);
+        target = new Vector3f(0, 5, -55);
+        // tell the AI where to go
+        nmnc.moveTo(target);
 
         // target shape
         Sphere sphereT = new Sphere(16, 16, 1);
@@ -170,35 +172,46 @@ public class Main extends SimpleApplication {
         String str = basicMessage;
 //        str += getPlayerInfo(playerNode1, "Player 1") + "\n";
 //        str += getPlayerInfo(playerNode2, "Player 2");
-         str = CameraDiagnostics(str);
-        boolean printStr = sampleNumber % 100 == 0;
-        if (printStr) {
-            str1Line = "";
-        }
-        //TODO: add update code
-        for (int i = 0; i < balls.size(); i++) {
-            Geometry x = balls.get(i);
-            Vector3f xPLOC = x.getControl(RigidBodyControl.class).getPhysicsLocation();
-            Vector3f xPVEL = x.getControl(RigidBodyControl.class).getLinearVelocity();
-            Vector3f xROT = x.getControl(RigidBodyControl.class).getAngularVelocity();
-            BallState bs = new BallState(i, sampleNumber, tpf, xPLOC, xPVEL, xROT);
-            ballRecords.add(bs);
-            if (printStr) {
-                str1Line += bs.toString();
-            }
-        }
-        sampleNumber++;
-        str += str1Line;
-        String targetS = aic.getLocalTranslation().toString() + "\n";
-        targetS += target.toString();
-        str += targetS;
-        HUDText.setText(str);
+        //  str = CameraDiagnostics(str);
+//        boolean printStr = sampleNumber % 100 == 0;
+//        if (printStr) {
+//            str1Line = "";
+//        }
+//        //TODO: add update code
+//        for (int i = 0; i < balls.size(); i++) {
+//            Geometry x = balls.get(i);
+//            Vector3f xPLOC = x.getControl(RigidBodyControl.class).getPhysicsLocation();
+//            Vector3f xPVEL = x.getControl(RigidBodyControl.class).getLinearVelocity();
+//            Vector3f xROT = x.getControl(RigidBodyControl.class).getAngularVelocity();
+//            BallState bs = new BallState(i, sampleNumber, tpf, xPLOC, xPVEL, xROT);
+//            ballRecords.add(bs);
+//            if (printStr) {
+//                str1Line += bs.toString();
+//            }
+//        }
+//        sampleNumber++;
+//        str += str1Line;
+        //String targetS = aic.getLocalTranslation().toString() + "\n";
+        //targetS += target.toString();
+        if (!nmnc.isUpdateDistance()) {
+            str += "Range: " + nmnc.getLastDistance() + "\n";
+            HUDText.setText(str);
+            float lastDistN = nmnc.getLastDistance();
+            if (lastDistN < 2f && lastDistN > 0.1f) {
+                // Move target
+                System.out.println("Range close: " + lastDistN + "\n");
+                Quaternion qt = new Quaternion();
+                qt.fromAngleAxis(110 * FastMath.DEG_TO_RAD, Vector3f.UNIT_Y);
+                Matrix3f M = qt.toRotationMatrix();
 
-        if(nmnc.getLastDistance() < 2f){
-            // Move target
-            Quaternion qt = new Quaternion(0, .5f, 0, 1);
-            targetGeom.rotate(qt);
-        }
+                target = targetGeom.getLocalTranslation();
+                target = M.mult(target);
+                targetGeom.setLocalTranslation(target);
+                nmnc.moveTo(target);
+                System.out.println("New Target: " + target.toString() + "\n");
+            }
+            nmnc.setUpdateDistance(true);
+        } 
     }
 
     @Override

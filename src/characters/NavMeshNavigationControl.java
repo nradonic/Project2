@@ -28,7 +28,8 @@ public class NavMeshNavigationControl extends AbstractControl {
     private PathfinderThread pathfinderThread;
     private Vector3f waypointPosition = null;
     private float lastDistance = 0f;
-    
+    private boolean updateDistance = false;
+
     public NavMeshNavigationControl(Node world) {
 
         Mesh mesh = ((Geometry) world.getChild("NavMesh")).getMesh();
@@ -41,13 +42,16 @@ public class NavMeshNavigationControl extends AbstractControl {
     @Override
     protected void controlUpdate(float tpf) {
         Vector3f spatialPosition = spatial.getWorldTranslation();
-        if(waypointPosition != null){
+        if (waypointPosition != null) {
             Vector2f aiPosition = new Vector2f(spatialPosition.x, spatialPosition.z);
             Vector2f waypoint2D = new Vector2f(waypointPosition.x, waypointPosition.z);
             float distance = aiPosition.distance(waypoint2D);
             // NR 
-            lastDistance = distance;
-            if(distance > 1f){
+            if (isUpdateDistance()) {
+                lastDistance = distance;
+                setUpdateDistance(false);
+            }
+            if (distance > 1f) {
                 Vector2f direction = waypoint2D.subtract(aiPosition);
                 direction.mult(tpf);
                 spatial.getControl(AICharacterControl.class).setViewDirection(new Vector3f(direction.x, 0, direction.y).normalize());
@@ -55,7 +59,7 @@ public class NavMeshNavigationControl extends AbstractControl {
             } else {
                 waypointPosition = null;
             }
-        } else if (!pathfinderThread.isPathfinding() && pathfinderThread.pathfinder.getNextWaypoint() != null && !pathfinderThread.pathfinder.isAtGoalWaypoint() ){
+        } else if (!pathfinderThread.isPathfinding() && pathfinderThread.pathfinder.getNextWaypoint() != null && !pathfinderThread.pathfinder.isAtGoalWaypoint()) {
             pathfinderThread.pathfinder.goToNextWaypoint();
             System.out.println("Moving to next way point...");
             waypointPosition = new Vector3f(pathfinderThread.pathfinder.getWaypointPosition());
@@ -72,13 +76,29 @@ public class NavMeshNavigationControl extends AbstractControl {
         pathfinderThread.setTarget(target);
     }
 
-    /** Nick Radonic
+    /**
+     * Nick Radonic
+     *
      * @return the lastDistance
      */
     public float getLastDistance() {
         return lastDistance;
     }
-    
+
+    /**
+     * @param updateDistance the updateDistance to set
+     */
+    public void setUpdateDistance(boolean updateDistance) {
+        this.updateDistance = updateDistance;
+    }
+
+    /**
+     * @return the updateDistance
+     */
+    public boolean isUpdateDistance() {
+        return updateDistance;
+    }
+
     private class PathfinderThread extends Thread {
 
         private Vector3f target;
@@ -93,7 +113,7 @@ public class NavMeshNavigationControl extends AbstractControl {
 
         @Override
         public void run() {
-            while(running){
+            while (running) {
                 if (target != null) {
                     pathfinding = true;
                     pathfinder.setPosition(getSpatial().getWorldTranslation());
@@ -116,10 +136,9 @@ public class NavMeshNavigationControl extends AbstractControl {
         public void setTarget(Vector3f target) {
             this.target = target;
         }
-        
-        public boolean isPathfinding(){
+
+        public boolean isPathfinding() {
             return pathfinding;
         }
     };
-    
 }

@@ -240,6 +240,7 @@ public class PhysicsTestHelper {
         boxGeometry.setLocalTranslation(wallLocation.x, wallLocation.y, wallLocation.z);
         boxGeometry.addControl(new RigidBodyControl(new MeshCollisionShape(box), 0));
         boxGeometry.getControl(RigidBodyControl.class).setRestitution(1); // perfect bounce
+        
         rootNode.attachChild(boxGeometry);
         space.add(boxGeometry);
     }
