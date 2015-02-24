@@ -17,10 +17,13 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.scene.shape.Sphere.TextureMode;
 import com.jme3.texture.Texture;
+import java.util.ArrayList;
+import mygame.BallState;
 
 /**
  *
@@ -28,6 +31,8 @@ import com.jme3.texture.Texture;
  */
 public class PhysicsTestHelper {
 
+    private ArrayList<BallState> runRecords = new ArrayList<BallState>();
+    public static  ArrayList<Geometry> balls = new ArrayList<Geometry>();
     /**
      * creates a simple physics test world with a floor, an obstacle and some
      * test boxes
@@ -113,6 +118,7 @@ public class PhysicsTestHelper {
             ballGeometry.getControl(RigidBodyControl.class).setLinearVelocity(new Vector3f(i, 0, 0));
             rootNode.attachChild(ballGeometry);
             space.add(ballGeometry);
+            balls.add(ballGeometry);
         }
         // NR new boxes
 //        for (int i = 1; i <= 5; i++) {

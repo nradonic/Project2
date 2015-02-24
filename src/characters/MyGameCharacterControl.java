@@ -33,7 +33,7 @@ public class MyGameCharacterControl extends BetterCharacterControl
     private Node owner;
 //    public Boolean current;
 //    private Boolean definitionTF;
-
+    
     public MyGameCharacterControl(float radius, float height, float mass) {
         super(radius, 2*height, mass);
         head.setLocalTranslation(0, height, 0);
