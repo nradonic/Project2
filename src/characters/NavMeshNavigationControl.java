@@ -47,10 +47,9 @@ public class NavMeshNavigationControl extends AbstractControl {
             Vector2f waypoint2D = new Vector2f(waypointPosition.x, waypointPosition.z);
             float distance = aiPosition.distance(waypoint2D);
             // NR 
-            if (isUpdateDistance()) {
+           
                 lastDistance = distance;
-                setUpdateDistance(false);
-            }
+                
             if (distance > 1f) {
                 Vector2f direction = waypoint2D.subtract(aiPosition);
                 direction.mult(tpf);

@@ -129,7 +129,7 @@ public class Main extends SimpleApplication {
         Node aiCharacter = (Node) assetManager.loadModel("Models/Jaime/Jaime.j3o");
 
         AICharacterControl physicsCharacter = new AICharacterControl(3f, 7.5f, 8f);
-        aiCharacter.setLocalTranslation(-50f, 10f, 50f);
+        aiCharacter.setLocalTranslation(-95f, 10f, 50f);
         aiCharacter.addControl(physicsCharacter);
         aic = aiCharacter;
 
@@ -142,7 +142,7 @@ public class Main extends SimpleApplication {
         aiCharacter.addControl(navMesh);
 
         // display search target location
-        target = new Vector3f(0, 5, -55);
+        target = new Vector3f(0, 5, 0);
         // tell the AI where to go
         nmnc.moveTo(target);
 
@@ -193,25 +193,11 @@ public class Main extends SimpleApplication {
 //        str += str1Line;
         //String targetS = aic.getLocalTranslation().toString() + "\n";
         //targetS += target.toString();
-        if (!nmnc.isUpdateDistance()) {
-            str += "Range: " + nmnc.getLastDistance() + "\n";
-            HUDText.setText(str);
+        
             float lastDistN = nmnc.getLastDistance();
-            if (lastDistN < 2f && lastDistN > 0.1f) {
-                // Move target
-                System.out.println("Range close: " + lastDistN + "\n");
-                Quaternion qt = new Quaternion();
-                qt.fromAngleAxis(110 * FastMath.DEG_TO_RAD, Vector3f.UNIT_Y);
-                Matrix3f M = qt.toRotationMatrix();
-
-                target = targetGeom.getLocalTranslation();
-                target = M.mult(target);
-                targetGeom.setLocalTranslation(target);
-                nmnc.moveTo(target);
-                System.out.println("New Target: " + target.toString() + "\n");
-            }
-            nmnc.setUpdateDistance(true);
-        } 
+            str += " Range: "+lastDistN+"\n";
+            HUDText.setText(str);
+         
     }
 
     @Override
@@ -278,29 +264,5 @@ public class Main extends SimpleApplication {
         }
 
         super.stop();
-    }
-
-    private Node createOttoCharacter() {
-        //Add the Player to the world and use the customer character and input control classes
-        float charHeight = 5f;
-        Node dummyTranslation = (Node) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
-        Node playerNode = new Node();
-        dummyTranslation.setLocalTranslation(new Vector3f(0, charHeight, 0));
-        playerNode.attachChild(dummyTranslation);
-
-        MyGameCharacterControl charControl = new MyGameCharacterControl(3f, charHeight, 80f);
-        charControl.setCamera(cam);
-
-        playerNode.addControl(charControl);
-        charControl.setGravity(normalGravity);
-        bulletAppState.getPhysicsSpace().add(charControl);
-        InputAppState appState = new InputAppState();
-        appState.setCharacter(charControl);
-        stateManager.attach(appState);
-        Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        material.setTexture("ColorMap", assetManager.loadTexture("Interface/Logo/Monkey.jpg"));
-        material.setColor("Color", ColorRGBA.Green);
-        playerNode.setMaterial(material);
-        return playerNode;
     }
 }
