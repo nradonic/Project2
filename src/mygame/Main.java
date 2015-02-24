@@ -1,8 +1,10 @@
 package mygame;
 
 import appstate.InputAppState;
+import characters.AICharacterControl;
 import physics.PhysicsTestHelper;
 import characters.MyGameCharacterControl;
+import characters.NavMeshNavigationControl;
 import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
@@ -19,6 +21,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Sphere;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
@@ -40,11 +43,12 @@ public class Main extends SimpleApplication {
     private ArrayList<BallState> ballRecords = new ArrayList<BallState>();
     private int sampleNumber = 1;
 //    private Node playerNode2;
-    public Boolean currentControl = new Boolean(true);
 //    private Vector3f player2Vector = new Vector3f(0.1f, 0f, 0.1f);
     private BitmapText HUDText;
-    private final String basicMessage = "CMSC325 Project2\n\n\t\t+";
+    private final String basicMessage = "CMSC325 Project2\n\n";
     private String str1Line = "";
+    private Node aic;
+    private Vector3f target;
 
     public static void main(String[] args) {
         Main app = new Main();
@@ -53,19 +57,21 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+
+        bulletAppState = new BulletAppState(); //Allows for the use of Physics simulation
+        stateManager.attach(bulletAppState);
         // custom camera positioning:
         cam.setLocation(new Vector3f(0, 25, 100));
         Vector3f upV = new Vector3f(0, 0.95f, -0.3f);
         Vector3f leftV = new Vector3f(-1f, 0, 0);
         Vector3f dirV = new Vector3f(0, -0.3f, -.95f);
         cam.setAxes(leftV, upV, dirV);
+        flyCam.setMoveSpeed(100f);
 
         //Add the Scene
-        Spatial scene = assetManager.loadModel("Scenes/Week3Scene.j3o");
-        rootNode.attachChild(scene);
-
-        bulletAppState = new BulletAppState(); //Allows for the use of Physics simulation
-        stateManager.attach(bulletAppState);
+        Node scene = setupWorld();
+        setupCharacterScene(scene);
+        //     rootNode.attachChild(scene);
         //stateManager.detach(stateManager.getState(FlyCamAppState.class));
 
         //Create the Physics World based on the Helper class
@@ -75,60 +81,6 @@ public class Main extends SimpleApplication {
         // parameters for a wall 
         // Nick Radonic
         PhysicsTestHelper.createWall(rootNode, assetManager, bulletAppState.getPhysicsSpace());
-
-        //Add the Player to the world and use the customer character and input control classes
-        float charHeight = 5f;
-
-        Node dummyTranslation = (Node) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
-        Node playerNode = new Node();
-        dummyTranslation.setLocalTranslation(new Vector3f(0, charHeight, 0));
-        playerNode.attachChild(dummyTranslation);
-        playerNode1 = playerNode;
-        MyGameCharacterControl charControl = new MyGameCharacterControl(3f, charHeight, 80f);
-
-        charControl.setCamera(cam);
-        charControl.setNodes(playerNode1);
-
-        playerNode.addControl(charControl);
-        charControl.setGravity(normalGravity);
-        bulletAppState.getPhysicsSpace().add(charControl);
-
-        InputAppState appState = new InputAppState();
-        appState.setCharacter(charControl);
-        stateManager.attach(appState);
-
-        Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        material.setTexture("ColorMap", assetManager.loadTexture("Interface/Logo/Monkey.jpg"));
-        material.setColor("Color", ColorRGBA.Green);
-        playerNode.setMaterial(material);
-
-        rootNode.attachChild(playerNode);
-        currentControl = true;
-
-        // Nick Radonic add second character
-        //Add the Player to the world and use the customer character and input control classes
-//        playerNode2 = (Node)assetManager.loadModel("Models/Oto/Oto.mesh.xml");
-//        MyGameCharacterControl charControl2 = new MyGameCharacterControl(4f,8f,20f);
-//        charControl2.setNodes(playerNode2, currentControl, false);
-//        
-//        Vector3f P2Location = new Vector3f(-10f, 0, 13f);
-//        playerNode2.setLocalTranslation(P2Location);
-//        //playerNode2.
-//        //cam.setLocation(new Vector3f(5,25,25));
-//        charControl2.setCamera(cam);
-//        playerNode2.addControl(charControl2);
-//        charControl2.setGravity(normalGravity);
-//        bulletAppState.getPhysicsSpace().add(charControl2);
-//        
-//        InputAppState appState2 = new InputAppState();
-//        appState2.setCharacter(charControl2);
-//        stateManager.attach(appState2);
-//        rootNode.attachChild(playerNode2);
-//        
-
-        flyCam.setMoveSpeed(100f);
-        //Add the "bullets" to the scene to allow the player to shoot the balls
-        PhysicsTestHelper.createBallShooter(this, rootNode, bulletAppState.getPhysicsSpace());
 
         //Add a custom font and text to the scene
         // Nick Radonic YuGothic font
@@ -142,11 +94,60 @@ public class Main extends SimpleApplication {
         hudText.setSize(guiFont.getCharSet().getRenderedSize());
 
         //Set the text in the middle of the screen
-        hudText.setLocalTranslation(settings.getWidth() / 2, settings.getHeight() / 2 + hudText.getLineHeight(), 0f); //Positions text to middle of screen
+        //Positions text to middle of screen
+        hudText.setLocalTranslation(settings.getWidth() / 2, settings.getHeight() / 2 + hudText.getLineHeight(), 0f);
         guiNode.attachChild(hudText);
 
         // Nick Radonic debug collisions
         bulletAppState.setDebugEnabled(true);
+
+
+    }
+
+    private Node setupWorld() {
+        Node scene = (Node) assetManager.loadModel("Scenes/Week6Scene.j3o");
+        rootNode.attachChild(scene);
+        Geometry navGeom = new Geometry("NavMesh");
+        navGeom.setMesh(((Geometry) scene.getChild("NavMesh")).getMesh());
+        Material green = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        green.setColor("Color", ColorRGBA.Green);
+        green.getAdditionalRenderState().setWireframe(true);
+        navGeom.setMaterial(green);
+        rootNode.attachChild(navGeom);
+
+        Spatial terrain = scene.getChild("terrain-Week6Scene");
+        terrain.addControl(new RigidBodyControl(0));
+        bulletAppState.getPhysicsSpace().addAll(terrain);
+        return scene;
+    }
+
+    private void setupCharacterScene(Node scene) {
+        Node aiCharacter = (Node) assetManager.loadModel("Models/Jaime/Jaime.j3o");
+
+        AICharacterControl physicsCharacter = new AICharacterControl(0.3f, 2.5f, 8f);
+        aiCharacter.addControl(physicsCharacter);
+        aic = aiCharacter;
+
+        bulletAppState.getPhysicsSpace().add(physicsCharacter);
+        aiCharacter.setLocalTranslation(0, 10, 0);
+        aiCharacter.setLocalScale(2f);
+        scene.attachChild(aiCharacter);
+        NavMeshNavigationControl navMesh = new NavMeshNavigationControl((Node) scene);
+
+        aiCharacter.addControl(navMesh);
+
+        // display search target location
+        target = new Vector3f(60, 10, -55);
+        navMesh.moveTo(target);
+
+        Sphere sphereT = new Sphere(16, 16, 1);
+        Geometry geom = new Geometry("Target", sphereT);
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setTexture("ColorMap", assetManager.loadTexture("Interface/Logo/Monkey.jpg"));
+        geom.setLocalTranslation(target);
+        geom.setMaterial(mat);
+        geom.addControl(new RigidBodyControl(0));
+        rootNode.attachChild(geom);
 
     }
 
@@ -161,7 +162,7 @@ public class Main extends SimpleApplication {
     public void simpleUpdate(float tpf) {
 //        playerNode2.move(player2Vector);
         String str = basicMessage;
-        str += getPlayerInfo(playerNode1, "Player 1") + "\n";
+//        str += getPlayerInfo(playerNode1, "Player 1") + "\n";
 //        str += getPlayerInfo(playerNode2, "Player 2");
         // str = CameraDiagnostics(str);
         boolean printStr = sampleNumber % 100 == 0;
@@ -182,6 +183,9 @@ public class Main extends SimpleApplication {
         }
         sampleNumber++;
         str += str1Line;
+        String targetS = aic.getLocalTranslation().toString() + "\n";
+        targetS += target.toString();
+        str += targetS;
         HUDText.setText(str);
 
     }
@@ -227,13 +231,13 @@ public class Main extends SimpleApplication {
         String userHome = System.getProperty("user.home");
         try {
             //System.out.println("try");
-            File file = new File( "assets/savedgames/gameballs.txt");
+            File file = new File("assets/savedgames/gameballs.txt");
             //System.out.println("new file "+file.getAbsolutePath());
             file.createNewFile();
             //System.out.println("create file");
             FileWriter fw = new FileWriter(file);
             //System.out.println("file writer");
-
+            int samples = Math.min(500, ballRecords.size());
             for (int i = Math.max(0, ballRecords.size() - 500); i < ballRecords.size(); i++) {
                 BallState bs = ballRecords.get(i);
                 String bss = bs.toString();
@@ -244,11 +248,35 @@ public class Main extends SimpleApplication {
             //System.out.println("flush fw");
             fw.close();
             //System.out.println("fw close");
-            System.out.println("Game ball position data written to gameballs.txt");
+            System.out.println(samples + " game ball position samples written to gameballs.txt");
         } catch (IOException ioex) {
-            System.out.println("Can't save data file gameballs.txt\n"+ioex );
+            System.out.println("Can't save data file gameballs.txt\n" + ioex);
         }
 
         super.stop();
+    }
+
+    private Node createOttoCharacter() {
+        //Add the Player to the world and use the customer character and input control classes
+        float charHeight = 5f;
+        Node dummyTranslation = (Node) assetManager.loadModel("Models/Oto/Oto.mesh.xml");
+        Node playerNode = new Node();
+        dummyTranslation.setLocalTranslation(new Vector3f(0, charHeight, 0));
+        playerNode.attachChild(dummyTranslation);
+
+        MyGameCharacterControl charControl = new MyGameCharacterControl(3f, charHeight, 80f);
+        charControl.setCamera(cam);
+
+        playerNode.addControl(charControl);
+        charControl.setGravity(normalGravity);
+        bulletAppState.getPhysicsSpace().add(charControl);
+        InputAppState appState = new InputAppState();
+        appState.setCharacter(charControl);
+        stateManager.attach(appState);
+        Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        material.setTexture("ColorMap", assetManager.loadTexture("Interface/Logo/Monkey.jpg"));
+        material.setColor("Color", ColorRGBA.Green);
+        playerNode.setMaterial(material);
+        return playerNode;
     }
 }

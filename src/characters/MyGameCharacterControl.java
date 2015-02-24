@@ -30,20 +30,13 @@ public class MyGameCharacterControl extends BetterCharacterControl
     private float cooldownTime = 1f;
     private float cooldown = 0f;
     // Nick Radonic - new Nodes
-    private Node owner;
-//    public Boolean current;
-//    private Boolean definitionTF;
-    
+
     public MyGameCharacterControl(float radius, float height, float mass) {
         super(radius, 2*height, mass);
         head.setLocalTranslation(0, height, 0);
         
     }
 
-    public void setNodes(Node owner) {
-        this.owner = owner;
-        
-    }
 
     public void onAction(String action, boolean isPressed, float tpf) {
         if (action.equals("StrafeLeft")) {

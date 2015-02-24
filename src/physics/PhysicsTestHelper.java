@@ -115,7 +115,7 @@ public class PhysicsTestHelper {
             //RigidBodyControl automatically uses Sphere collision shapes when attached to single geometry with sphere mesh
             ballGeometry.addControl(new RigidBodyControl(4f)); // arbitrary mass of 4 units
             ballGeometry.getControl(RigidBodyControl.class).setRestitution(1); // coef 1= perfect bounce
-            ballGeometry.getControl(RigidBodyControl.class).setLinearVelocity(new Vector3f(i, 0, 0));
+            ballGeometry.getControl(RigidBodyControl.class).setLinearVelocity(new Vector3f(10*i, 0, 0));
             rootNode.attachChild(ballGeometry);
             space.add(ballGeometry);
             balls.add(ballGeometry);
@@ -337,24 +337,30 @@ public class PhysicsTestHelper {
      */
     public static void createWall(Node rootNode, AssetManager assetManager,
             PhysicsSpace space) {
-        final float WallHeight = 100f;
-        Vector3f wallSize = new Vector3f(20, WallHeight, 0.1f);
-        Vector3f wallLocation = new Vector3f(0, WallHeight, -20);
+        final float WallHeight = 20f;
+        Vector3f wallSize = new Vector3f(WallHeight, WallHeight, 0.1f);
+        Vector3f wallLocation = new Vector3f(0, WallHeight, -WallHeight);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
 
         // parameters for a wall 
-        wallSize = new Vector3f(20, WallHeight, 0.1f);
-        wallLocation = new Vector3f(0, WallHeight, 20);
+        wallSize = new Vector3f(WallHeight, WallHeight, 0.1f);
+        wallLocation = new Vector3f(0, WallHeight, WallHeight);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
 
         // parameters for a wall 
-        wallSize = new Vector3f(0.1f, WallHeight, 20);
-        wallLocation = new Vector3f(-20, WallHeight, 0);
+        wallSize = new Vector3f(0.1f, WallHeight, WallHeight);
+        wallLocation = new Vector3f(-WallHeight, WallHeight, 0);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
 
         // parameters for a wall 
-        wallSize = new Vector3f(0.1f, WallHeight, 20);
-        wallLocation = new Vector3f(20, WallHeight, 0);
+        wallSize = new Vector3f(0.1f, WallHeight, WallHeight);
+        wallLocation = new Vector3f(WallHeight, WallHeight, 0);
         createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
+        
+        // parameters for a roof 
+        wallSize = new Vector3f(WallHeight, .1f, WallHeight);
+        wallLocation = new Vector3f(0, 2 * WallHeight, 0);
+        createFixedBoundaryWall(rootNode, assetManager, space, wallSize, wallLocation);
+        
     }
 }
