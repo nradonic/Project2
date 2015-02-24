@@ -14,6 +14,7 @@ import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
@@ -49,7 +50,9 @@ public class Main extends SimpleApplication {
     private String str1Line = "";
     private Node aic;
     private Vector3f target;
-
+    private NavMeshNavigationControl nmnc;
+    private Geometry targetGeom;
+    
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -61,10 +64,10 @@ public class Main extends SimpleApplication {
         bulletAppState = new BulletAppState(); //Allows for the use of Physics simulation
         stateManager.attach(bulletAppState);
         // custom camera positioning:
-        cam.setLocation(new Vector3f(0, 25, 100));
-        Vector3f upV = new Vector3f(0, 0.95f, -0.3f);
-        Vector3f leftV = new Vector3f(-1f, 0, 0);
-        Vector3f dirV = new Vector3f(0, -0.3f, -.95f);
+        cam.setLocation(new Vector3f(0, 270f, 150f));
+        Vector3f upV = new Vector3f(0, .4f, -.9f);
+        Vector3f leftV = new Vector3f(-1, 0, 0);
+        Vector3f dirV = new Vector3f(0, -.9f, -.4f);
         cam.setAxes(leftV, upV, dirV);
         flyCam.setMoveSpeed(100f);
 
@@ -124,27 +127,30 @@ public class Main extends SimpleApplication {
     private void setupCharacterScene(Node scene) {
         Node aiCharacter = (Node) assetManager.loadModel("Models/Jaime/Jaime.j3o");
 
-        AICharacterControl physicsCharacter = new AICharacterControl(0.3f, 2.5f, 8f);
+        AICharacterControl physicsCharacter = new AICharacterControl(3f, 7.5f, 8f);
+        aiCharacter.setLocalTranslation(-50f, 10f, 50f);
         aiCharacter.addControl(physicsCharacter);
         aic = aiCharacter;
-
+        
+        
         bulletAppState.getPhysicsSpace().add(physicsCharacter);
-        aiCharacter.setLocalTranslation(0, 10, 0);
-        aiCharacter.setLocalScale(2f);
+        aiCharacter.setLocalScale(5f);
         scene.attachChild(aiCharacter);
         NavMeshNavigationControl navMesh = new NavMeshNavigationControl((Node) scene);
-
+        nmnc = navMesh; //NR
         aiCharacter.addControl(navMesh);
 
         // display search target location
         target = new Vector3f(60, 10, -55);
         navMesh.moveTo(target);
 
+        // target shape
         Sphere sphereT = new Sphere(16, 16, 1);
         Geometry geom = new Geometry("Target", sphereT);
         Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         mat.setTexture("ColorMap", assetManager.loadTexture("Interface/Logo/Monkey.jpg"));
         geom.setLocalTranslation(target);
+        targetGeom = geom;
         geom.setMaterial(mat);
         geom.addControl(new RigidBodyControl(0));
         rootNode.attachChild(geom);
@@ -164,7 +170,7 @@ public class Main extends SimpleApplication {
         String str = basicMessage;
 //        str += getPlayerInfo(playerNode1, "Player 1") + "\n";
 //        str += getPlayerInfo(playerNode2, "Player 2");
-        // str = CameraDiagnostics(str);
+         str = CameraDiagnostics(str);
         boolean printStr = sampleNumber % 100 == 0;
         if (printStr) {
             str1Line = "";
@@ -188,6 +194,11 @@ public class Main extends SimpleApplication {
         str += targetS;
         HUDText.setText(str);
 
+        if(nmnc.getLastDistance() < 2f){
+            // Move target
+            Quaternion qt = new Quaternion(0, .5f, 0, 1);
+            targetGeom.rotate(qt);
+        }
     }
 
     @Override

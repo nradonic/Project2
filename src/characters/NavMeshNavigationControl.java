@@ -27,7 +27,8 @@ public class NavMeshNavigationControl extends AbstractControl {
 
     private PathfinderThread pathfinderThread;
     private Vector3f waypointPosition = null;
-
+    private float lastDistance = 0f;
+    
     public NavMeshNavigationControl(Node world) {
 
         Mesh mesh = ((Geometry) world.getChild("NavMesh")).getMesh();
@@ -44,6 +45,8 @@ public class NavMeshNavigationControl extends AbstractControl {
             Vector2f aiPosition = new Vector2f(spatialPosition.x, spatialPosition.z);
             Vector2f waypoint2D = new Vector2f(waypointPosition.x, waypointPosition.z);
             float distance = aiPosition.distance(waypoint2D);
+            // NR 
+            lastDistance = distance;
             if(distance > 1f){
                 Vector2f direction = waypoint2D.subtract(aiPosition);
                 direction.mult(tpf);
@@ -67,6 +70,13 @@ public class NavMeshNavigationControl extends AbstractControl {
 
     public void moveTo(Vector3f target) {
         pathfinderThread.setTarget(target);
+    }
+
+    /** Nick Radonic
+     * @return the lastDistance
+     */
+    public float getLastDistance() {
+        return lastDistance;
     }
     
     private class PathfinderThread extends Thread {
