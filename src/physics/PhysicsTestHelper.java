@@ -6,6 +6,7 @@ import com.jme3.asset.TextureKey;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.collision.shapes.MeshCollisionShape;
+import com.jme3.bullet.collision.shapes.SphereCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -107,6 +108,7 @@ public class PhysicsTestHelper {
         // lots of movable spheres NR
         for (int i = 0; i < 3; i++) {
             Sphere sphere = new Sphere(16, 16, randomSphere(3f));
+            
             Geometry ballGeometry = new Geometry("Soccer ball", sphere);
             Material mt2 = material.clone();
             mt2.setColor("Color", splashSomeColorOnMyBrush());
@@ -116,9 +118,12 @@ public class PhysicsTestHelper {
             ballGeometry.addControl(new RigidBodyControl(4f)); // arbitrary mass of 4 units
             ballGeometry.getControl(RigidBodyControl.class).setRestitution(1); // coef 1= perfect bounce
             ballGeometry.getControl(RigidBodyControl.class).setLinearVelocity(new Vector3f(10*i, 0, 0));
+            //ballGeometry.getControl(RigidBodyControl.class).setCollisionShape(new SphereCollisionShape());
+            
             rootNode.attachChild(ballGeometry);
             space.add(ballGeometry);
             balls.add(ballGeometry);
+            
         }
         // NR new boxes
 //        for (int i = 1; i <= 5; i++) {

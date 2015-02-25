@@ -7,9 +7,13 @@ import characters.MyGameCharacterControl;
 import characters.NavMeshNavigationControl;
 import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
+import com.jme3.bounding.BoundingVolume;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.shapes.CollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.objects.infos.RigidBodyMotionState;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
 import com.jme3.font.BitmapFont;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
@@ -20,6 +24,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
@@ -193,11 +198,11 @@ public class Main extends SimpleApplication {
 //        str += str1Line;
         //String targetS = aic.getLocalTranslation().toString() + "\n";
         //targetS += target.toString();
-        
-            float lastDistN = nmnc.getLastDistance();
-            str += " Range: "+lastDistN+"\n";
-            HUDText.setText(str);
-         
+        str += checkCollisions();
+        float lastDistN = nmnc.getLastDistance();
+        str += " Range: " + lastDistN + "\n";
+        HUDText.setText(str);
+
     }
 
     @Override
@@ -216,6 +221,30 @@ public class Main extends SimpleApplication {
         Vector3f pos = player.getLocalTranslation();
         String result = "\n\n" + name + " x: " + pos.x + "\n" + name + " y: " + pos.y + "\n" + name + " z: " + pos.z;
         return result;
+    }
+
+    private String checkCollisions() {
+
+        String bumps = "";
+        if (balls != null) {
+            CollisionResults results = new CollisionResults();
+
+            for (int i = 0; i < balls.size() - 1; i++) {
+                for (int j = i + 1; j < balls.size(); j++) {
+
+                    Geometry a = balls.get(i);
+                    Geometry b = balls.get(j);
+
+                    Vector3f distV = a.getLocalTranslation().subtract(b.getLocalTranslation());
+                    float distF = distV.length();
+
+                    if (a.getWorldBound().intersects(b.getModelBound())) {
+                        bumps += "Bump Distance: " + i + "  " + j + "  " + distF + "\n";
+                    }
+                }
+            }
+        }
+        return bumps;
     }
 
     /**
