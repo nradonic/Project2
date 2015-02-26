@@ -182,20 +182,20 @@ public class Main extends SimpleApplication {
 //        if (printStr) {
 //            str1Line = "";
 //        }
-//        //TODO: add update code
-//        for (int i = 0; i < balls.size(); i++) {
-//            Geometry x = balls.get(i);
-//            Vector3f xPLOC = x.getControl(RigidBodyControl.class).getPhysicsLocation();
-//            Vector3f xPVEL = x.getControl(RigidBodyControl.class).getLinearVelocity();
-//            Vector3f xROT = x.getControl(RigidBodyControl.class).getAngularVelocity();
-//            BallState bs = new BallState(i, sampleNumber, tpf, xPLOC, xPVEL, xROT);
-//            ballRecords.add(bs);
+        //TODO: add update code
+        for (int i = 0; i < balls.size(); i++) {
+            Geometry x = balls.get(i);
+            Vector3f xPLOC = x.getControl(RigidBodyControl.class).getPhysicsLocation();
+            Vector3f xPVEL = x.getControl(RigidBodyControl.class).getLinearVelocity();
+            Vector3f xROT = x.getControl(RigidBodyControl.class).getAngularVelocity();
+            BallState bs = new BallState(i, sampleNumber, tpf, xPLOC, xPVEL, xROT);
+            ballRecords.add(bs);
 //            if (printStr) {
 //                str1Line += bs.toString();
 //            }
-//        }
-//        sampleNumber++;
-//        str += str1Line;
+        }
+        sampleNumber++;
+        str += str1Line;
         //String targetS = aic.getLocalTranslation().toString() + "\n";
         //targetS += target.toString();
         str += checkCollisions();
@@ -227,7 +227,7 @@ public class Main extends SimpleApplication {
 
         String bumps = "";
         if (balls != null) {
-            CollisionResults results = new CollisionResults();
+//            CollisionResults results = new CollisionResults();
 
             for (int i = 0; i < balls.size() - 1; i++) {
                 for (int j = i + 1; j < balls.size(); j++) {
@@ -238,7 +238,7 @@ public class Main extends SimpleApplication {
                     Vector3f distV = a.getLocalTranslation().subtract(b.getLocalTranslation());
                     float distF = distV.length();
 
-                    if (a.getWorldBound().intersects(b.getModelBound())) {
+                    if (a.getWorldBound().intersects(b.getWorldBound())) {
                         bumps += "Bump Distance: " + i + "  " + j + "  " + distF + "\n";
                     }
                 }
